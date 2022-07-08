@@ -1,11 +1,9 @@
 #include <iostream>
 #include<string>
 #include<conio.h>
-#include<Windows.h>
 #include<cstdlib>
 #include<fstream>
 
-#define MAX 1000
 
 using namespace std;
 
@@ -29,14 +27,18 @@ struct AddressBooks  // 通讯录
 	int cnt;
 };
 
-void show_Menu();  // 显示菜单  
+void show_Menu();  // 显示菜单
+void show(Person* p);  // 单个联系人显示
 void add_Person(AddressBooks* abs);  // 添加联系人
 void show_Person(AddressBooks* abs);  // 显示联系人
 int find_Person(AddressBooks* abs);  // 检测联系人存在
 void delete_Person(AddressBooks* abs);  // 删除联系人
-void lookUp_Peoson(AddressBooks* abs);  // 查找联系人
+void lookUp_Peoson_byName(AddressBooks* abs);  // 查找联系人 根据姓名
+void lookUp_Peoson_bySex(AddressBooks* abs);  // 查找联系人 根据性别
+void lookUp_Peoson_byBirth(AddressBooks* abs);  // 查找联系人 根据生日
 void modify_Peoson(AddressBooks* abs);  // 修改联系人
 void clean_All_Peoson(AddressBooks* abs);  // 清空联系人
+void read_File(AddressBooks* abs);  // 读取文件
 
 
 int main()
@@ -47,9 +49,9 @@ int main()
 	abs.head = new Person;
 	abs.head->next = nullptr;
 	
+	show_Menu();  // 显示菜单
 	while (true)
 	{
-		show_Menu();  // 显示菜单
 		cout << "请输入选项:";
 		cin >> select;
 		switch (select)
@@ -67,18 +69,34 @@ int main()
 			break;
 			
 		case 4: 
-			lookUp_Peoson(&abs);  // 查找联系人
+			lookUp_Peoson_byName(&abs);  // 查找联系人 根据姓名
 			break;
 			
-		case 5:
-			modify_Peoson(&abs);  // 修改联系人
+		case 5: 
+			lookUp_Peoson_bySex(&abs);  // 查找联系人 根据性别
 			break;
 			
 		case 6: 
+			lookUp_Peoson_byBirth(&abs);  // 查找联系人 根据生日
+			break;
+			
+		case 7:
+			modify_Peoson(&abs);  // 修改联系人
+			break;
+			
+		case 8: 
 			clean_All_Peoson(&abs);  // 清空联系人
 			break;
 			
-		case 7:  //退出通讯录
+		case 9: 
+			read_File(&abs);  // 读取文件
+			break;
+		
+		case 10:
+			show_Menu();  // 显示菜单
+			break;
+			
+		case 0:  //退出通讯录
 			cout << "退出程序......" << endl;
 			return 0;
 			break;
@@ -86,7 +104,6 @@ int main()
 		default :
 			cout << "输入错误......" << endl<<"请输入(1、2、3..)";
 		}
-		system("cls");  // 清屏
 	}
 
 	return 0;
@@ -100,13 +117,31 @@ void show_Menu()
 	cout << "|      1、增加联系人        |\n";
 	cout << "|      2、显示联系人        |\n";
 	cout << "|      3、删除联系人        |\n";
-	cout << "|      4、查找联系人        |\n";
-	cout << "|      5、修改联系人        |\n";
-	cout << "|      6、清空联系人        |\n";
-	cout << "|      7、退出程序          |\n";
+	cout << "|      4、查找联系人(姓名)  |\n";
+	cout << "|      5、查找联系人(性别)  |\n";
+	cout << "|      6、查找联系人(生日)  |\n";
+	cout << "|      7、修改联系人        |\n";
+	cout << "|      8、清空联系人        |\n";
+	cout << "|      9、读取文件          |\n";
+	cout << "|     10、显示菜单          |\n";
+	cout << "|      0、退出程序          |\n";
 	cout << "+***************************+\n";
 	cout << "|    计算机20-1  刘宇诺     |\n";
 	cout << "+***************************+\n";
+}
+
+
+// 单个联系人显示
+void show(Person* p)
+{
+	cout << "No:  " << p->no << "\t";
+	cout << "Name:  " << p->name << "\t";
+	cout << "Sex:   " << (p->sex == 1 ?  "MAN":"WOMAN" ) << "\t";
+	cout << "Tel:  " << p->tel << "\t";
+	cout << "QQ:   " <<  p->_qq  << "\t";
+	cout << "WeChat:   " << p->wechat << "\t";
+	cout << "Address:   " << p->addr << "\t";
+	cout << "Birth:  " << p->birth << endl;
 }
 
 
@@ -179,11 +214,6 @@ void add_Person(AddressBooks* abs)
 	p->next = tmp;
 	
 	ofs.close();
-	cout << "成功加入新联系人" << endl;
-	cout << "按下 enter 键继续" << endl;
-	_getch();
-	system("cls");
-	show_Menu();
 }
 
 
@@ -193,11 +223,6 @@ void show_Person(AddressBooks* abs)
 	if (abs->cnt == 0)
 	{
 		cout << "通讯录是空的" << endl;
-		
-		cout << "按下 enter 键继续" << endl;
-		_getch();
-		system("cls");
-		show_Menu();
 		return;
 	}
 	else
@@ -205,22 +230,10 @@ void show_Person(AddressBooks* abs)
 		Person* p = abs->head->next;
 		while (p)
 		{
-			cout << "No:  " << p->no << "\t";
-			cout << "Name:  " << p->name << "\t";
-			cout << "Sex:   " << (p->sex == 1 ?  "MAN":"WOMAN" ) << "\t";
-			cout << "Tel:  " << p->tel << "\t";
-			cout << "QQ:   " <<  p->_qq  << "\t";
-			cout << "WeChat:   " << p->wechat << "\t";
-			cout << "Address:   " << p->addr << "\t";
-			cout << "Birth:  " << p->birth << endl;
-			
+			show(p);
 			p = p->next;
 		}
 	}
-	
-	cout << "按下 enter 键继续" << endl;
-	_getch();
-	show_Menu();
 }
 
 
@@ -260,28 +273,18 @@ void delete_Person(AddressBooks* abs)
 		delete q;
 		abs->cnt --;
 		cout << "成功删除" << endl;
-		
-		cout << "按下 enter 键继续" << endl;
-		_getch();
-		system("cls");
-		show_Menu();
 	}
 	else
 	{
 		cout << "输入的姓名不存在与通讯录中" << endl;
-		
-		cout << "按下 enter 键继续" << endl;
-		_getch();
-		system("cls");
-		show_Menu();
 	}
 }
 
 
-//查找联系人
-void lookUp_Peoson(AddressBooks* abs)
+//查找联系人 根据姓名
+void lookUp_Peoson_byName(AddressBooks* abs)
 {
-	cout << "Please input the name you want to look up: ";
+	cout << "请输入姓名:";
 	int ans = find_Person(abs);
 	if (ans != -1)
 	{
@@ -290,31 +293,62 @@ void lookUp_Peoson(AddressBooks* abs)
 		{
 			p = p->next;
 		}
-		cout << "No:  " << p->no << "\t";
-		cout << "Name:  " << p->name << "\t";
-		cout << "Sex:   " << (p->sex == 1 ?  "MAN":"WOMAN" ) << "\t";
-		cout << "Tel:  " << p->tel << "\t";
-		cout << "QQ:   " <<  p->_qq  << "\t";
-		cout << "WeChat:   " << p->wechat << "\t";
-		cout << "Address:   " << p->addr << "\t";
-		cout << "Birth:  " << p->birth << endl;
 		
-		cout << "按下 enter 键继续" << endl;
-		_getch();
-		system("cls");
-		show_Menu();
+		show(p);
 	}
 	else
 	{
 		cout << "输入的姓名没有在通讯录中" << endl;
-		
-		cout << "按下 enter 键继续" << endl;
-		_getch();
-		system("cls");
-		show_Menu();
 	}
 }
 
+
+// 查找联系人 根据性别
+void lookUp_Peoson_bySex(AddressBooks* abs)
+{
+	int sex;
+	cout << "请输入性别1:MAN,2:WOMAN,输入1 或 2:" << endl;
+	cin >> sex;
+	if (abs->cnt == 0)
+	{
+		cout << "通讯录为空" << endl;
+		return;
+	} 
+	
+	Person* p = abs->head;
+	while(p->next)
+	{
+		if (p->next->sex == sex)
+		{
+			show(p->next);
+		}
+		p = p->next;
+	}
+} 
+
+
+// 查找联系人 根据生日
+void lookUp_Peoson_byBirth(AddressBooks* abs)
+{
+	string birth;
+	cout << "请输入生日,格式2001.01.08:" << endl;
+	cin >> birth;
+	if (abs->cnt == 0)
+	{
+		cout << "通讯录为空" << endl;
+		return;
+	} 
+	
+	Person* p = abs->head;
+	while(p->next)
+	{
+		if (p->next->birth == birth)
+		{
+			show(p->next);
+		}
+		p = p->next;
+	}
+}  
 
 // 修改联系人
 void modify_Peoson(AddressBooks* abs)
@@ -385,20 +419,10 @@ void modify_Peoson(AddressBooks* abs)
 		p->birth = birth;
 		
 		cout << "修改成功" << endl;
-		
-		cout << "按下 enter 键继续" << endl;
-		_getch();
-		system("cls");
-		show_Menu();
 	}
 	else
 	{
 		cout << "该姓名不在通讯录中" << endl;
-		
-		cout << "按下 enter 键继续" << endl;
-		_getch();
-		system("cls");
-		show_Menu();
 	}
 }
 
@@ -419,15 +443,57 @@ void clean_All_Peoson(AddressBooks* abs)
 			p = p->next;
 			delete q;
 		}
+		abs->head->next = nullptr;
 		cout << "通讯录已经清空." << endl;
-		
-		cout << "按下 enter 键继续" << endl;
-		_getch();
-		system("cls");
-		show_Menu();
 	}
 	else
 	{
 		return;
 	}
+}
+
+// 读取文件
+void read_File(AddressBooks* abs)
+{
+	Person* p = abs->head;
+	while (p->next) p = p->next;
+	
+	string new_file;
+	cout << "请输入要读取的文件名：";
+	cin >> new_file;
+	fstream file;
+	file.open(new_file.c_str(), ios::in);
+	if (file.bad())
+	{
+		cout << "文件打开失败！" << endl;
+		return;
+	}
+	int len = 0;
+	file >> len;
+	while (!len)
+	{
+		cout << "文件数据异常！" << endl;
+		return;
+	}
+
+	file.get();
+	while (len--)
+	{
+		Person* tmp = new Person;
+		tmp->next = nullptr;
+		file >> tmp->no;
+		file >> tmp->name;
+		file >> tmp->sex;
+		file >> tmp->tel;
+		file >> tmp->_qq;
+		file >> tmp->wechat;
+		file >> tmp->addr;
+		file >> tmp->birth;
+		p->next = tmp;
+		abs->cnt ++ ;
+		p = p->next;
+	}
+	file.close();
+	cout << "文件读入成功！" << endl;
+	return;
 }
